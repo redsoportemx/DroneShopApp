@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+//
 function NuevaOrden() {
   // Estado local para manejar datos del formulario
   const [form, setForm] = useState({
-    id: "",
     cliente: "",
     dron: "",
     descripcion: "",
@@ -24,7 +23,8 @@ function NuevaOrden() {
   // Enviar datos al backend
   const handleSubmit = (e) => {
     e.preventDefault(); // Evita recargar página
-    axios.post("http://localhost:8000/orders/", form)
+   axios.post(`${process.env.REACT_APP_API_URL}/orders/`, form)
+
       .then(() => navigate("/")) // Redirige al listado
       .catch(err => console.error(err));
   };
@@ -33,7 +33,7 @@ function NuevaOrden() {
     <div>
       <h2>➕ Crear Nueva Orden</h2>
       <form onSubmit={handleSubmit}>
-        <input name="id" placeholder="ID" onChange={handleChange} required /><br />
+  {/* El campo ID no se debe enviar, lo asigna el backend automáticamente */}
         <input name="cliente" placeholder="Cliente" onChange={handleChange} required /><br />
         <input name="dron" placeholder="Dron" onChange={handleChange} required /><br />
         <textarea name="descripcion" placeholder="Descripción" onChange={handleChange}></textarea><br />

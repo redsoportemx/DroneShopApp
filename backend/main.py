@@ -1,3 +1,8 @@
+# --------------------------------------------------------
+# main.py
+# Archivo principal de la API para gestionar órdenes de drones
+# --------------------------------------------------------
+
 # Importamos FastAPI para crear la API, Depends para inyectar dependencias
 # y HTTPException para manejar errores en caso de que algo falle.
 from fastapi import FastAPI, Depends, HTTPException
@@ -17,7 +22,16 @@ import database
 
 # Instanciamos la aplicación FastAPI.
 app = FastAPI()
+# Configuración de CORS para permitir solicitudes desde el frontend
+from fastapi.middleware.cors import CORSMiddleware
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # O especifica la URL de tu frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # -------------------------------------------
 # Crear tablas en la base de datos si no existen.
 # Esto se hace a partir de los modelos definidos en models.py
@@ -66,6 +80,23 @@ def listar_ordenes(db: Session = Depends(get_db)):
 
 
 # -------------------------------------------
+# Consultar una orden por ID (GET /orders/{order_id})
+# Busca una orden específica en la base de datos por su ID.
+# -------------------------------------------
+@app.get("/orders/{order_id}", response_model=schemas.Order)
+def obtener_orden(order_id: int, db: Session = Depends(get_db)):
+    # Buscamos la orden en la DB filtrando por ID
+    orden = db.query(models.Order).filter(models.Order.id == order_id).first()
+
+    # Si no se encuentra la orden, devolvemos un error 404
+    if not orden:
+        raise HTTPException(status_code=404, detail="Orden no encontrada")
+
+    # Si existe, devolvemos la orden encontrada
+    return orden
+
+
+# -------------------------------------------
 # Modelo para actualizar el estado de una orden
 # Usamos BaseModel de Pydantic para validar que el body JSON
 # contenga un campo "estado" de tipo string.
@@ -78,8 +109,13 @@ class EstadoUpdate(BaseModel):
 # Actualizar solo el estado de una orden (PATCH /orders/{order_id})
 # Recibe el ID de la orden en la URL y el nuevo estado en el body (JSON).
 # -------------------------------------------
+
+# -------------------------------------------
+# Actualizar todos los campos de una orden (PATCH /orders/{order_id})
+# Recibe el ID de la orden y los campos a actualizar en el body (JSON).
+# -------------------------------------------
 @app.patch("/orders/{order_id}", response_model=schemas.Order)
-def actualizar_estado(order_id: int, data: EstadoUpdate, db: Session = Depends(get_db)):
+def actualizar_orden(order_id: int, data: schemas.OrderUpdate, db: Session = Depends(get_db)):
     # Buscamos la orden en la DB filtrando por ID
     orden = db.query(models.Order).filter(models.Order.id == order_id).first()
 
@@ -87,8 +123,11 @@ def actualizar_estado(order_id: int, data: EstadoUpdate, db: Session = Depends(g
     if not orden:
         raise HTTPException(status_code=404, detail="Orden no encontrada")
 
-    # Si se encontró, actualizamos el estado usando el body recibido
-    orden.estado = data.estado
+    # Actualizamos solo los campos que vienen en el body
+    update_data = data.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(orden, key, value)
+
     db.commit()          # Guardamos cambios
     db.refresh(orden)    # Refrescamos el objeto para devolverlo actualizado
     return orden

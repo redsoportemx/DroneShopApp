@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 function OrdenesList() {
   // Estado local donde se guardan las órdenes que vienen de la API
   const [ordenes, setOrdenes] = useState([]);
-
+//
   // useEffect se ejecuta cuando carga el componente
   useEffect(() => {
     //axios.get("http://localhost:8000/orders/") // Petición GET al backend FastAPI

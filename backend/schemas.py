@@ -15,6 +15,19 @@ class OrderBase(BaseModel):
     fecha_entrega: Optional[str] = None  # Puede ser nulo
 
 # -------------------------------------------
+# OrderUpdate
+# Permite actualizar uno o varios campos de la orden.
+# Todos los campos son opcionales para actualizaciones parciales.
+# -------------------------------------------
+class OrderUpdate(BaseModel):
+    cliente: Optional[str] = None
+    dron: Optional[str] = None
+    descripcion: Optional[str] = None
+    estado: Optional[str] = None
+    fecha_ingreso: Optional[str] = None
+    fecha_entrega: Optional[str] = None
+
+# -------------------------------------------
 # OrderCreate
 # Extiende OrderBase, se usa cuando el cliente crea una orden.
 # En este caso no agregamos nada nuevo, pero permite separar responsabilidades.
