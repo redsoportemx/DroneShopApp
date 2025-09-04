@@ -8,7 +8,8 @@ function OrdenesList() {
 
   // useEffect se ejecuta cuando carga el componente
   useEffect(() => {
-    axios.get("http://localhost:8000/orders/") // Petición GET al backend FastAPI
+    //axios.get("http://localhost:8000/orders/") // Petición GET al backend FastAPI
+    axios.get(`${process.env.REACT_APP_API_URL}/orders/`) //
       .then(res => setOrdenes(res.data))       // Guardamos respuesta en "ordenes"
       .catch(err => console.error(err));
   }, []);  // [] significa que solo se ejecuta una vez al inicio
