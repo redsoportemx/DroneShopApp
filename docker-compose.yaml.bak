@@ -1,0 +1,41 @@
+
+services:
+  backend:
+    build: ./backend              # Construye con el Dockerfile en /backend
+    container_name: fastapi-backend
+    ports:
+      - "8000:8000"               # Backend expuesto en http://localhost:8000
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/orders_db
+    volumes:
+      - ./backend:/app            # Monta backend para desarrollo
+
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: orders_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+#front end como comentario para hacer pruebas por terminal al backend
+  #frontend:
+   # build: ./frontend             # Construye con el Dockerfile en /frontend
+    #container_name: react-frontend
+    #ports:
+    #  - "3000:3000"               # Frontend expuesto en http://localhost:3000
+    #stdin_open: true              # Necesario para que React no se cierre
+    #tty: true
+    #depends_on:
+     # - backend
+    #volumes:
+     # - ./frontend:/app           # Monta el frontend para desarrollo
+
+volumes:
+  db_data:
